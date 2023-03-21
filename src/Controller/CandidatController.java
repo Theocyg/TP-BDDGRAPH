@@ -8,10 +8,7 @@ import View.Contact;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
 import javax.swing.JOptionPane;
 
@@ -67,14 +64,13 @@ public class CandidatController {
             contact.getValiderButton().addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    if (e.getSource() == contact.getValiderButton()) {
                         // Récupération des valeurs des champs du formulaire
                         String nom = contact.getTfNom().getText();
                         String prenom = contact.getTfPrenom().getText();
-                        String dateNaissance = contact.getTfDateNaissance().getText();
-                        String lieuNaissance = contact.getTfLieuNaissance().getText();
+                        String dateNaiss = contact.getTfDateNaissance().getText();
+                        String lieuNaiss = contact.getTfLieuNaissance().getText();
                         String nationalite = contact.getTfNationalite().getText();
-                        String num = contact.getTfNum().getText();
+                        String telephone = contact.getTfNum().getText();
                         String mail = contact.getTfMail().getText();
                         String rue = contact.getTfRue().getText();
                         String cp = contact.getTfCP().getText();
@@ -89,38 +85,62 @@ public class CandidatController {
                         String bac = (String) contact.getBacChoix().getSelectedItem();
 
                         // Connexion à la base de données
+                        PreparedStatement pst = null;
+                        ResultSet rst = null;
+
                         try {
+
+                            // Récupération de l'ID de la filière choisie
+                            pst = connection.prepareStatement("SELECT idFil FROM filiere WHERE nom = ?");
+                            pst.setString(1, filiere);
+                            rst = pst.executeQuery();
+                            int idFil = 0;
+
+                            while (rst.next()) {
+                                idFil = rst.getInt(1);
+                            }
+
+
+                            // Récupération de l'ID de la spécialité correspondant au bac choisi
+                            pst = connection.prepareStatement("SELECT idBac FROM bac WHERE libelle = ?");
+                            pst.setString(1, bac);
+                            rst = pst.executeQuery();
+                            String idBac = "";
+
+                            while (rst.next()) {
+                                idBac = rst.getString(1);
+                            }
                             Class.forName("com.mysql.jdbc.Driver");
-                            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/bddgraph", "root", "");
-                            PreparedStatement pst = con.prepareStatement(
-                                    "INSERT INTO etudiant (nom, prenom, dateNaissance, lieuNaissance, nationalite, num, mail, rue, cp, ville, sexe, hobbies, filiere, niveau, bac) " +
+
+                          DriverManager.getConnection("jdbc:mysql://localhost:3306/bddgraph", "root", "");
+                            connection.prepareStatement(
+                                    "INSERT INTO etudiant (nom, prenom, dateNaiss, lieuNaiss, sexe, hobbies, nationalite, rue, cp, ville, telephone, mail, niveau, idFil, idBac) " +
                                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                             // Attribution des valeurs aux paramètres de la requête
                             pst.setString(1, nom);
                             pst.setString(2, prenom);
-                            pst.setString(3, dateNaissance);
-                            pst.setString(4, lieuNaissance);
+                            pst.setString(3, dateNaiss);
+                            pst.setString(4, lieuNaiss);
+                            pst.setString(11, sexe);
+                            pst.setString(12, String.join(", ", hobbies));
                             pst.setString(5, nationalite);
-                            pst.setString(6, num);
-                            pst.setString(7, mail);
                             pst.setString(8, rue);
                             pst.setString(9, cp);
                             pst.setString(10, ville);
-                            pst.setString(11, sexe);
-                            pst.setString(12, String.join(", ", hobbies));
-                            pst.setString(13, filiere);
+                            pst.setString(6, telephone);
+                            pst.setString(7, mail);
                             pst.setString(14, niveau);
+                            pst.setString(13, filiere);
                             pst.setString(15, bac);
                             // Exécution de la requête
                             pst.executeUpdate();
                             // Fermeture de la connexion
-                            con.close();
+                            connection.close();
                         } catch (Exception ex) {
                             System.out.println(ex.getMessage());
 
                         }
                     }
-                }
             });
         }
 

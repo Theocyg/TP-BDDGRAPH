@@ -29,7 +29,6 @@ public class Connexion {
         catch (SQLException e) {
             // Traitement des exceptions
         }
-        System.out.println(objConn);
 
         return objConn;
     }
