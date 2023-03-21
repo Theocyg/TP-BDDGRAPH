@@ -100,30 +100,31 @@ public class EtudiantRepository implements ActionListener {
 
             // Message de confirmation de l'ajout
             JOptionPane.showMessageDialog(view, "L'étudiant a été ajouté avec succès !");
-/*
-            // Effacement du formulaire
-            view.getTfNom().setText("");
-            view.getTfPrenom().setText("");
-            view.getTfDateNaissance().setText("");
-            view.getTfLieuNaissance().setText("");
-            view.getTfNationalite().setText("");
-            view.getTfNum().setText("");
-            view.getTfMail().setText("");
-            view.getTfRue().setText("");
-            view.getTfCP().setText("");
-            view.getTfVille().setText("");
-            view.getHommeRadioButton().setSelected(true);
-            view.getMusiqueCheckBox().setSelected(false);
-            view.getVoyagesCheckBox().setSelected(false);
-            view.getSportsCheckBox().setSelected(false);
-            view.getLectureCheckBox().setSelected(false);
-            view.getFiliereChoix().setSelectedIndex(0);
-            view.getNiveauChoix().setSelectedIndex(0);
-            view.getBacChoix().setSelectedIndex(0);
+    /*            
+    /// Méthode qui affiche les étudiants de la base dans un Jtable
+    public void setResEtudiantsBtnComportement(){
+        contactEtudiantView.getResEtudiantBtn().addActionListener(new ActionListener()) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                EtudiantRepository etudiantRepository = new EtudiantRepository();
+                ResultSet liste = etudiantRepository.selectAllEtudiants(connection);
+                try {
+                    int nbEtudiants = etudiantRepository.countEtudiantInDataBase(connection);
+                    ResEtudiantView resEtudiantView = new ResEtudiantView();
+                    resEtudiantView.afficherTable(liste,nbEtudiants);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
 
 
- */
+
+            }
+        };
+    }
+    }
+    */
         }
     }
 }
+
 
