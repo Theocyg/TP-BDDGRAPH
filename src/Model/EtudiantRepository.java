@@ -1,124 +1,129 @@
 package Model;
 
-import Controller.CandidatController;
 import View.Contact;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.*;
-import java.text.SimpleDateFormat;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.Date;
 
-public class EtudiantRepository {
+public class EtudiantRepository implements ActionListener {
     private Contact view;
     private final Connection connection = Connexion.getConnection();
 
-    private String nom;
-    private String prenom;
-    private Date dateNaiss;
-    private String lieuNaiss;
-    private String nationalite;
-    private String rue;
-    private String ville;
-    private String mail;
-    private String telephone;
-    private String hobbies;
-    private String sexe;
-    private String niveau;
-    private String bac;
-    private String filiere;
-    private int cp;
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == view.getValiderButton()) {
+            // Récupération des valeurs des champs du formulaire
+            String nom = view.getTfNom().getText();
+            String prenom = view.getTfPrenom().getText();
+            String dateNaissance = view.getTfDateNaissance().getText();
+            String lieuNaissance = view.getTfLieuNaissance().getText();
+            String nationalite = view.getTfNationalite().getText();
+            String num = view.getTfNum().getText();
+            String mail = view.getTfMail().getText();
+            String rue = view.getTfRue().getText();
+            String cp = view.getTfCP().getText();
+            String ville = view.getTfVille().getText();
+            String sexe = view.getHommeRadioButton().isSelected() ? "Homme" : "Femme";
+            String[] hobbies = {view.getMusiqueCheckBox().isSelected() ? "Musique" : "",
+                    view.getVoyagesCheckBox().isSelected() ? "Voyages" : "",
+                    view.getSportsCheckBox().isSelected() ? "Sports" : "",
+                    view.getLectureCheckBox().isSelected() ? "Lecture" : ""};
+            String filiere = (String) view.getFiliereChoix().getSelectedItem();
+            String niveau = (String) view.getNiveauChoix().getSelectedItem();
+            String bac = (String) view.getBacChoix().getSelectedItem();
 
-    public EtudiantRepository(String nom, String prenom, Date dateNaissance, String lieuNaissance, String nationalite, String rue, String ville, String mail, String telephone, String sexe, String niveau, String bac, String filiere, int cp) {
-        this.nom = nom;
-        this.prenom = prenom;
-        this.dateNaiss = dateNaissance;
-        this.lieuNaiss = lieuNaissance;
-        this.nationalite = nationalite;
-        this.rue = rue;
-        this.ville = ville;
-        this.mail = mail;
-        this.telephone = telephone;
-        this.sexe = sexe;
-        this.niveau = niveau;
-        this.bac = bac;
-        this.hobbies = "";
-        this.filiere = filiere;
-        this.cp = cp;
-    }
-    public String toString() {
-        return "Etudiant{" +
-                "nom='" + nom + '\'' +
-                ", prenom='" + prenom + '\'' +
-                ", dateNaissance='" + dateNaiss + '\'' +
-                ", lieuNaissance='" + lieuNaiss + '\'' +
-                ", Nationalite='" + nationalite + '\'' +
-                ", rue='" + rue + '\'' +
-                ", ville='" + ville + '\'' +
-                ", mail='" + mail + '\'' +
-                ", telephone='" + telephone + '\'' +
-                ", loisirs='" + hobbies + '\'' +
-                ", cp=" + cp +
-                ", sexe='" + sexe + '\'' +
-                ", niveau='" + niveau + '\'' +
-                ", filiere=" + filiere +
-                ", bac=" + bac +
-                '}';
-    }
+            // Connexion à la base de données
+            Connection con = null;
+            PreparedStatement pst = null;
+            ResultSet rst = null;
 
+            try {
+                Class.forName("com.mysql.jdbc.Driver");
+                con = DriverManager.getConnection("jdbc:mysql://localhost:3306/concours", "root", "");
+
+                // Récupération de l'ID de la filière choisie
+                pst = con.prepareStatement("SELECT idFil FROM filiere WHERE nom = ?");
+                pst.setString(1, filiere);
+                rst = pst.executeQuery();
+                String idFil = "";
+
+                while (rst.next()) {
+                    idFil = rst.getString(1);
+                }
+
+                // Récupération de l'ID de la spécialité correspondant au bac choisi
+                pst = con.prepareStatement("SELECT idBac FROM bac WHERE libelle = ?");
+                pst.setString(1, bac);
+                rst = pst.executeQuery();
+                String idBac = "";
+
+                while (rst.next()) {
+                    idBac = rst.getString(1);
+                }
 
 
-    public int insertEtudiant(Connection connection) throws SQLException {
-        PreparedStatement preparedStatement = null;
-        int resultSet;
+                // Insertion du nouvel étudiant dans la base de données
+                pst = con.prepareStatement(
+                        "INSERT INTO etudiant (nom, prenom, dateNaiss, lieuNaiss,sexe, nationalite, rue, cp, ville, telephone, mail, hobbies, niveau, idFil, idBac) " +
+                                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-        try {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            String sql = "INSERT INTO etudiant (idBac, idFil,  nom, prenom, dateNaiss, lieuNaiss, sexe, nationalite, rue, cp,  ville, telephone, mail, niveau,loisir) VALUES ((SELECT idBac FROM bac WHERE libelle = ?), (SELECT idFil FROM filiere WHERE nom = ?), ?, ?,?,?,?,?,?,?,?,?,?,?, ?)";
-            preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1, bac);
-            preparedStatement.setString(2, filiere);
-            preparedStatement.setString(3, nom);
-            preparedStatement.setString(4, prenom);
-            preparedStatement.setString(5, simpleDateFormat.format(dateNaiss));
-            preparedStatement.setString(6, lieuNaiss);
-            preparedStatement.setString(7, sexe);
-            preparedStatement.setString(8, nationalite);
-            preparedStatement.setString(9, rue);
-            preparedStatement.setInt(10, cp);
-            preparedStatement.setString(11, ville);
-            preparedStatement.setString(12, telephone);
-            preparedStatement.setString(13, mail);
-            preparedStatement.setString(14, niveau);
-            preparedStatement.setString(15, hobbies);
-            resultSet = preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+                // Attribution des valeurs aux paramètres de la requête
+                pst.setString(1, nom);
+                pst.setString(2, prenom);
+                pst.setString(3, dateNaissance);
+                pst.setString(4, lieuNaissance);
+                pst.setString(11, sexe);
+                pst.setString(5, nationalite);
+                pst.setString(8, rue);
+                pst.setString(9, cp);
+                pst.setString(10, ville);
+                pst.setString(6, num);
+                pst.setString(7, mail);
+                pst.setString(12, String.join(", ", hobbies));
+                pst.setString(14, niveau);
+                pst.setString(13, idFil);
+                pst.setString(15, idBac);
+                // Exécution de la requête
+                pst.executeUpdate();
+                // Fermeture de la connexion
+                con.close();
+
+            } catch (Exception ex) {
+                System.out.println("Erreur lors de l'insertion de l'étudiant : " + ex.getMessage());
+            }
+
+            // Message de confirmation de l'ajout
+            JOptionPane.showMessageDialog(view, "L'étudiant a été ajouté avec succès !");
+/*
+            // Effacement du formulaire
+            view.getTfNom().setText("");
+            view.getTfPrenom().setText("");
+            view.getTfDateNaissance().setText("");
+            view.getTfLieuNaissance().setText("");
+            view.getTfNationalite().setText("");
+            view.getTfNum().setText("");
+            view.getTfMail().setText("");
+            view.getTfRue().setText("");
+            view.getTfCP().setText("");
+            view.getTfVille().setText("");
+            view.getHommeRadioButton().setSelected(true);
+            view.getMusiqueCheckBox().setSelected(false);
+            view.getVoyagesCheckBox().setSelected(false);
+            view.getSportsCheckBox().setSelected(false);
+            view.getLectureCheckBox().setSelected(false);
+            view.getFiliereChoix().setSelectedIndex(0);
+            view.getNiveauChoix().setSelectedIndex(0);
+            view.getBacChoix().setSelectedIndex(0);
+
+
+ */
         }
-        return resultSet;
     }
-
-    /*
-    public ResultSet checkEtudiantInDataBase(Connection connection) {
-        java.sql.PreparedStatement pstmt;
-        ResultSet resultSet = null;
-        try {
-            String request = "SELECT count(*) FROM etudiant WHERE (nom = ? AND prenom = ? AND dateNaiss = ? AND lieuNaiss = ?) OR telephone = ?";
-            pstmt = connection.prepareStatement(request);
-            pstmt.setString(1, this.nom);
-            pstmt.setString(2, this.prenom);
-            pstmt.setString(3, this.dateNaiss.toString());
-            pstmt.setString(4, this.lieuNaiss);
-            pstmt.setString(5, this.telephone);
-            resultSet = pstmt.executeQuery();
-            System.out.println(resultSet);
-        } catch (SQLException e) {
-            System.out.println("Erreur lors du chargement " + e.getMessage());
-        }
-        return resultSet;
-    }
-
-     */
 }
+

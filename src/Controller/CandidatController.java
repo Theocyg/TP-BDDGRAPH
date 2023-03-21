@@ -76,10 +76,10 @@ public class CandidatController {
                         String cp = contact.getTfCP().getText();
                         String ville = contact.getTfVille().getText();
                         String sexe = contact.getHommeRadioButton().isSelected() ? "Homme" : "Femme";
-                        String[] hobbies = {contact.getMusiqueCheckBox().isSelected() ? "Musique" : "",
-                                contact.getVoyagesCheckBox().isSelected() ? "Voyages" : "",
-                                contact.getSportsCheckBox().isSelected() ? "Sports" : "",
-                                contact.getLectureCheckBox().isSelected() ? "Lecture" : ""};
+                        String[] hobbies = {contact.getMusiqueCheckBox().isSelected() ? "Musique" : " Musique",
+                                contact.getVoyagesCheckBox().isSelected() ? "Voyages" : "Voyages",
+                                contact.getSportsCheckBox().isSelected() ? "Sports" : "Sports",
+                                contact.getLectureCheckBox().isSelected() ? "Lecture" : "Lecture"};
                         String filiere = (String) contact.getFiliereChoix().getSelectedItem();
                         String niveau = (String) contact.getNiveauChoix().getSelectedItem();
                         String bac = (String) contact.getBacChoix().getSelectedItem();
@@ -122,7 +122,7 @@ public class CandidatController {
                             pst.setString(3, dateNaiss);
                             pst.setString(4, lieuNaiss);
                             pst.setString(11, sexe);
-                            pst.setString(12, String.join(", ", hobbies));
+                            pst.setString(12, String.valueOf(hobbies));
                             pst.setString(5, nationalite);
                             pst.setString(8, rue);
                             pst.setString(9, cp);
